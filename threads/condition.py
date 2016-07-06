@@ -53,7 +53,7 @@ def main():
     integers = []
     condition = threading.Condition()
     t1 = Producer(integers, condition)
-    t2 = Producer(integers, condition)
+    t2 = Consumer(integers, condition)
     t1.start()
     t2.start()
     t1.join()
