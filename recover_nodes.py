@@ -15,17 +15,24 @@ class MaxNodesError(Exception):
     pass
 
 
+class ExistsNodeError(Exception):
+    pass
+
+
 class Node(object):
 
     def __init__(self, val):
         self.value = val
         self.next = None
 
-    def __repr__(self):
+    def __str__(self):
         s = "%s" % self.value
         if self.next:
             s += " -> %s" % self.next.value
         return s
+
+    def __repr__(self):
+        return '<Node %s>' % str(self)
 
 
 class ListNodes(object):
@@ -35,33 +42,40 @@ class ListNodes(object):
         self.head = None
         self.current = None
         self.last = None
-        self.nodes = []
+        self.nodes_map = {}
 
     def create_head(self, val="head", prefix="node"):
         if self.head:
             raise ValueError("List not empty!")
         self.head = Node('_'.join((prefix, str(val))))
         self.current = self.head
-        self.nodes.append(self.head)
+        self.nodes_map[self.head.value] = self.head
 
     def create_next(self, val, prefix="node"):
-        if len(self.nodes) >= self.size:
+        if len(self.nodes_map) >= self.size:
             raise MaxNodesError("Max size of this list nodes is: %d" % self.size)
         if not self.head:
             raise ValueError("Create head node first!")
+        if val in self.nodes_map:
+            raise ExistsNodeError("Node exists: %s" % self.nodes_map[val])
         node = Node('_'.join((prefix, str(val))))
         self.current.next = node
         self.current = node
         self.last = node
-        self.nodes.append(node)
+        self.nodes_map[val] = node
 
     def __str__(self):
+        if not self.head:
+            return "Empty"
         s = "%s" % self.head.value
         current = self.head
         while current.next:
             s += " -> %s" % current.next.value
             current = current.next
         return s
+
+    def __repr__(self):
+        return "<List %s>" % str(self)
 
 
 def non_recurse(head):
@@ -91,18 +105,10 @@ def recurse(head, newhead):
     return newhead
 
 
-my_lists = ListNodes()
-my_lists.create_head()
-for i in xrange(8):
-    my_lists.create_next(i)
-
-
-print my_lists  # node_head -> node_0 -> node_1 -> node_2 -> node_3 -> node_4 -> node_5 -> node_6 -> node_7
-
-"""
-new_list = non_recurse(my_lists.head)
-print combined_node_list(new_list)  # node_7 -> node_6 -> node_5 -> node_4 -> node_3 -> node_2 -> node_1 -> node_0 -> node_head
-"""
-
-new_list2 = recurse(my_lists.head, None)
-print combined_node_list(new_list2)  # node_7 -> node_6 -> node_5 -> node_4 -> node_3 -> node_2 -> node_1 -> node_0 -> node_head
+def example():
+    max_size = 10
+    mylist = ListNodes(size=max_size)
+    mylist.create_head()
+    for i in xrange(max_size - 1):
+        mylist.create_next(i)
+    print repr(mylist)  # <List node_head -> node_0 -> node_1 -> node_2 -> node_3 -> node_4 -> node_5 -> node_6 -> node_7 -> node_8>
